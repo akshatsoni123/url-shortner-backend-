@@ -1,0 +1,36 @@
+=== Lookup by short_code (after migration 002, natural planner) ===
+
+Seq Scan on urls  (cost=0.00..1.04 rows=1 width=99) (actual time=0.013..0.014 rows=1 loops=1)
+  Filter: ((short_code)::text = 'gh'::text)
+  Rows Removed by Filter: 2
+Planning Time: 1.824 ms
+Execution Time: 0.043 ms
+
+Note: With only 3 rows, PostgreSQL may choose Seq Scan even though urls_short_code_key exists.
+Forced index verification (SET enable_seqscan = off):
+
+Index Scan using urls_short_code_key on urls  (cost=0.13..8.15 rows=1 width=90) (actual time=0.082..0.083 rows=1 loops=1)
+  Index Cond: ((short_code)::text = 'gh'::text)
+Planning Time: 6.353 ms
+Execution Time: 0.261 ms
+
+=== Expired URLs / TTL cleanup (after migration 002, natural planner) ===
+
+Seq Scan on urls  (cost=0.00..1.04 rows=1 width=90) (actual time=0.009..0.009 rows=0 loops=1)
+  Filter: ((expires_at IS NOT NULL) AND (expires_at < now()))
+  Rows Removed by Filter: 3
+Planning Time: 0.846 ms
+Execution Time: 0.024 ms
+
+Forced index verification (SET enable_seqscan = off):
+
+Index Scan using idx_urls_expires_at on urls  (cost=0.13..8.15 rows=1 width=90) (actual time=0.097..0.098 rows=0 loops=1)
+  Index Cond: ((expires_at IS NOT NULL) AND (expires_at < now()))
+Planning Time: 0.987 ms
+Execution Time: 0.128 ms
+
+=== Indexes on urls table (\d urls) ===
+
+urls_pkey              PRIMARY KEY, btree (id)
+urls_short_code_key    UNIQUE CONSTRAINT, btree (short_code)
+idx_urls_expires_at    btree (expires_at)

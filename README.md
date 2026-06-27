@@ -25,11 +25,28 @@ Backend for a URL shortener built with Node.js, Express, PostgreSQL, and Redis.
    docker compose up -d
    ```
 
-4. Install dependencies and run the app:
+4. Install dependencies, migrate, and run the app:
    ```bash
    npm install
+   npm run db:setup
    npm run dev
    ```
+
+## Database indexes
+
+| Index | Column | Notes |
+|-------|--------|-------|
+| `urls_pkey` | `id` | Primary key (auto-indexed) |
+| `urls_short_code_key` | `short_code` | Auto-created by UNIQUE constraint |
+| `idx_urls_expires_at` | `expires_at` | TTL cleanup queries |
+
+Run query plans:
+
+```bash
+npm run explain
+```
+
+See [docs/indexing/findings.md](docs/indexing/findings.md) for EXPLAIN ANALYZE notes.
 
 ## Verify
 

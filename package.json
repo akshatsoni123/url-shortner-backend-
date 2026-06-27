@@ -9,6 +9,7 @@
     "migrate": "node scripts/migrate.js",
     "seed": "node scripts/seed.js",
     "db:setup": "npm run migrate && npm run seed",
+    "explain": "node scripts/explain-lookup.js",
     "test": "node --test tests/**/*.test.js"
   },
   "repository": {

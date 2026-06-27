@@ -1,0 +1,14 @@
+=== Lookup by short_code (before migration 002) ===
+
+Index Scan using urls_short_code_key on urls  (cost=0.15..8.17 rows=1 width=99) (actual time=1.139..1.165 rows=1 loops=1)
+  Index Cond: ((short_code)::text = 'gh'::text)
+Planning Time: 8.786 ms
+Execution Time: 3.123 ms
+
+=== Expired URLs / TTL cleanup (before migration 002) ===
+
+Seq Scan on urls  (cost=0.00..18.55 rows=189 width=90) (actual time=1.302..1.303 rows=0 loops=1)
+  Filter: ((expires_at IS NOT NULL) AND (expires_at < now()))
+  Rows Removed by Filter: 3
+Planning Time: 0.521 ms
+Execution Time: 1.427 ms
