@@ -13,7 +13,6 @@ describe('POST /api/urls', () => {
     if (createdShortCode) {
       await pool.query('DELETE FROM urls WHERE short_code = $1', [createdShortCode]);
     }
-    await pool.end();
   });
 
   it('creates a short URL and persists to DB', async () => {
@@ -48,7 +47,7 @@ describe('POST /api/urls', () => {
   it('returns 409 for duplicate custom alias', async () => {
     const res = await request(app)
       .post('/api/urls')
-      .send({ url: 'https://google.com', customAlias: 'gh' }) // 'gh' from seed
+      .send({ url: 'https://google.com', customAlias: 'google' }) // 'google' from seed
       .expect(409);
 
     assert.ok(res.body.error);
