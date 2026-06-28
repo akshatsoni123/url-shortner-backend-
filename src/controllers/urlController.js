@@ -1,24 +1,25 @@
 const { createUrl } = require('../services/urlService');
 const { BASE_URL } = require('../config');
 
-// Idempotency choice: same long URL always gets a NEW short code (no dedup)
 async function shortenUrl(req, res, next) {
   try {
-    const { url, customAlias } = req.body; // from JSON body: { "url": "...", "customAlias": "..." }
+    const { url, customAlias, ttlSeconds, expiresAt } = req.body;
 
     const row = await createUrl({
-      longUrl: url,           // map API field "url" → service field "longUrl"
+      longUrl: url,
       customAlias: customAlias,
+      ttlSeconds: ttlSeconds,
+      expiresAt: expiresAt,
     });
 
-    // 201 Created — new resource was saved
     res.status(201).json({
       shortCode: row.short_code,
-      shortUrl: `${BASE_URL}/${row.short_code}`, // full clickable short link
+      shortUrl: `${BASE_URL}/${row.short_code}`,
       longUrl: row.long_url,
+      expiresAt: row.expires_at,
     });
   } catch (err) {
-    next(err); // pass to errorHandler middleware
+    next(err);
   }
 }
 
