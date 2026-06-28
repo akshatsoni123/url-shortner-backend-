@@ -1,6 +1,7 @@
 const { pool } = require('../db/postgres');
 const { generateShortCode } = require('../utils/shortCode');
 const { validateLongUrl, validateCustomAlias } = require('../utils/urlValidator');
+const { setCachedUrl } = require('../cache/urlCache');
 
 const MAX_RETRIES = 3;
 const PG_UNIQUE_VIOLATION = '23505'; // PostgreSQL error code for UNIQUE fail
@@ -34,8 +35,9 @@ async function createUrl({ longUrl, customAlias }) {
         [shortCode, longUrl]
       );
 
-      return result.rows[0]; // success!
-    } catch (error) {
+      const row = result.rows[0];
+      await setCachedUrl(row.short_code, row.long_url);
+      return row;    } catch (error) {
       // 3. Handle duplicate short_code
       if (error.code === PG_UNIQUE_VIOLATION) {
         // Custom alias taken → don't retry, return 409

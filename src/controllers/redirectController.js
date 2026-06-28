@@ -4,10 +4,9 @@ async function redirectToLongUrl(req, res, next) {
   try {
     const { shortCode } = req.params; // from route GET /:shortCode
 
-    const { longUrl, lookupMs } = await getUrlByShortCode(shortCode);
+    const { longUrl, lookupMs, source } = await getUrlByShortCode(shortCode);
 
-    // Log DB lookup time — compare with Redis in Issue #7
-    console.log(`[redirect] shortCode=${shortCode} lookupMs=${lookupMs} source=postgres`);
+    console.log(`[redirect] shortCode=${shortCode} lookupMs=${lookupMs} source=${source}`);
 
     // 302 = temporary redirect (browser follows to longUrl)
     res.redirect(302, longUrl);

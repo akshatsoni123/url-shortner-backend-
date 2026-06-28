@@ -1,8 +1,17 @@
 const { pool } = require('../db/postgres');
+const { getCachedUrl, setCachedUrl } = require('../cache/urlCache');
 
 // Look up URL by short code — READ path (opposite of createUrl INSERT)
 async function getUrlByShortCode(shortCode) {
   const start = performance.now(); // start timer for Issue #6 baseline logging
+  const cachedUrl = await getCachedUrl(shortCode);
+  if (cachedUrl) {
+    return {
+      longUrl: cachedUrl,
+      lookupMs: Number((performance.now() - start).toFixed(2)),
+      source: 'redis',
+    };
+  }
 
   const result = await pool.query(
     `SELECT id, short_code, long_url, expires_at, is_active
@@ -38,11 +47,13 @@ async function getUrlByShortCode(shortCode) {
     err.lookupMs = lookupMs;
     throw err;
   }
-
+ 
+  await setCachedUrl(shortCode, row.long_url);
   // Success — return long URL + timing for logging
   return {
     longUrl: row.long_url,
     lookupMs,
+    source: 'postgres',
   };
 }
 
